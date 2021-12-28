@@ -95,12 +95,12 @@ int StarServer(int m)
         int t=WinExec(pathway,SW_SHOW);
         if(t>=31)
         {
-            cout<<"server success launcher"<<endl;
+            cout<<"Successfully restarted server"<<endl;
             Sleep(1000); 
         } 
         else
         {
-            cout<<"something wrong!"<<endl;
+            cout<<"something went wrong!"<<endl;
             exit(0);
         }
         
@@ -124,7 +124,7 @@ int compare(int *ResultSet, struct EXE *exe, int n)
         }
         else 
         { 
-	        cout << "Did not find sever"  << endl; 
+	        cout << "Did not find server"  << endl; 
             temp2=i;    
 			cout<<temp2<<endl;                                                                                                                            
             return temp2;
@@ -221,7 +221,7 @@ int main()
     string name="Titanfall2-unpacked.exe";     
     cout<<name<<endl;
     int n;
-    cout<< "Number of sever" <<endl;
+    cout<< "Number of servers" <<endl;
     cin>>n;
     StarServer(n);
     int save[n+1];//save pid

@@ -95,13 +95,13 @@ int StarServer(int m)
         int t=WinExec(pathway,SW_SHOW);
         if(t>=31)
         {
-            cout<<"Successfully restarted server"<<endl;
+            cout<<"server success launcher"<<endl;
             Sleep(1000); 
         } 
         else
         {
-            cout<<"something went wrong!"<<endl;
-            exit(0);
+            cout<<"something wrong!"<<endl;
+            //exit(0);
         }
         
     }
@@ -124,7 +124,7 @@ int compare(int *ResultSet, struct EXE *exe, int n)
         }
         else 
         { 
-	        cout << "Did not find server"  << endl; 
+	        cout << "Did not find sever"  << endl; 
             temp2=i;    
 			cout<<temp2<<endl;                                                                                                                            
             return temp2;
@@ -216,17 +216,18 @@ int check(std::string name, int *ResultSet, int n, struct EXE *exe)
 
 int main() 
 {
+	cout<<"1"<<endl;
     cout<<"This is not a simple script!!!!!! Please dont call it script I will be sad (T_T)"<<endl;
     cout<< "target :"<< endl;
-    string name="Titanfall2-unpacked.exe";     
+    string name="Titanfall2-unpacked.exe";  // sort Titanfall2-unpacked 
     cout<<name<<endl;
     int n;
-    cout<< "Number of servers" <<endl;
+    cout<< "Number of sever" <<endl;
     cin>>n;
     StarServer(n);
-    int save[n+1];//save pid
-    int ResultSet[n+1];
-    memset(save, 0, n+10);
+    int save[1000];//save pid
+    int ResultSet[1000];
+    memset(save, 0, 1000);
 	for(int i=0;i<n;i++)
 	{
 	    DWORD pid = qureyProcessId(name,save);
@@ -240,6 +241,7 @@ int main()
 	{
 	    cout<<exe[i].Pathway<<endl<<exe[i].SavePid<<endl;
     }
+    Sleep(5000);
     check(name,ResultSet,n,exe);//start  
     getch();
     return 0;

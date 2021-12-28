@@ -1,3 +1,8 @@
+/*版本1.1
+1.现在可以手动启动服务器不用输路径了
+2.修改了一些不必要的代码
+2.修改了部分函数传参,申明*/
+
 #include <iostream>
 #include <bits/stdc++.h> 
 #include <string>
@@ -9,16 +14,31 @@
 #include <tlhelp32.h>
 #include<conio.h>
 using namespace std; 
+
+
+#define Max 0x7f7f7f
+
+
+DWORD once(string name,int mark);
+DWORD qureyProcessId(std::string name,int *save);
+int StarServer(int m);
+int compare(int *ResultSet, struct EXE *exe, int n);
+//string rds(string path,string name);
+int restart(string path,int mark,int n,string name);
+int check(std::string name, int *ResultSet, int n, struct EXE *exe);
+
 struct EXE
 {   
-	int SavePid;        //  id 
+	int SavePid;      // pid 
 	string Pathway;  //pathway  
 };
-EXE exe[0x7f7f7f];
+EXE exe[Max];
+
+
+
 DWORD once(string name,int mark)
 {
-   DWORD pid;
-    //DWORD save[1000];
+    DWORD pid;
     PROCESSENTRY32 entry;
     entry.dwSize = sizeof(PROCESSENTRY32);
     HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
@@ -30,7 +50,6 @@ DWORD once(string name,int mark)
             {
                 HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, entry.th32ProcessID);
                 pid = GetProcessId(hProcess);
-                //std::cout << "pid = " << pid << std::endl;
                 CloseHandle(hProcess);
             }
         }
@@ -38,10 +57,10 @@ DWORD once(string name,int mark)
     CloseHandle(snapshot);
     return pid;	
 }
+
 DWORD qureyProcessId(std::string name,int *save) 
 {
     DWORD pid;
-    //DWORD save[1000];
     PROCESSENTRY32 entry;
     entry.dwSize = sizeof(PROCESSENTRY32);
     int i=0;
@@ -56,51 +75,52 @@ DWORD qureyProcessId(std::string name,int *save)
                 pid = GetProcessId(hProcess);
                 save[i]=pid;
                 i++;
-                //std::cout << "pid = " << pid << std::endl;
-               //CloseHandle(hProcess);
             }
         }
     }
     CloseHandle(snapshot);
     return pid;
 }
-int FileChoose(int m)
+
+
+int StarServer(int m)
 {
-    /*for(int i=0;i<m;i++)
+    for(int i=0;i<m;i++)
     {       
-        exe[i].Pathway=fidd(1);//fidd 
-    }*/
-    cout<<"exe path way"<<endl; 
-    /*for(int i=0;i<m;i++)
-    {       
-        //cin>>
-        exe[i].Pathway=fidd(1);
-    }*/
-        exe[0].Pathway="E:\\PS1\\Titanfall2-unpacked.exe";
+        char pathway[1145];
+        exe[i].Pathway+=fidd(1);
+        cout<<exe[i].Pathway<<endl;
+        strcpy(pathway,exe[i].Pathway.c_str()); 
+        //cout<<pathway<<endl;
+        int t=WinExec(pathway,SW_SHOW);
+        if(t>=31)
+        {
+            cout<<"server success launcher"<<endl;
+            Sleep(1000); 
+        } 
+        else
+        {
+            cout<<"something wrong!"<<endl;
+            exit(0);
+        }
         
-        exe[1].Pathway="E:\\PS2\\Titanfall2-unpacked.exe";
-        
-        exe[2].Pathway="E:\\PS3\\Titanfall2-unpacked.exe";
-        
-        exe[3].Pathway="E:\\PS4\\Titanfall2-unpacked.exe";
+    }
+    
 }
+
+
 int compare(int *ResultSet, struct EXE *exe, int n)
 {
     int temp2;
     for(int i=0;i<n;i++)
     {
-	    /*for(int j=0;j<n;j++)
-		{
-		    cout<<ResultSet[j]<<endl;
-		}	*/
     	temp2=0;
         int* ans;
 		ans=find(ResultSet,ResultSet+n,exe[i].SavePid);
         if (*ans == exe[i].SavePid)
         { 
-            temp2=-1;
-            //cout<<exe[i].SavePid<<" "<<ans<<endl;
-            //continue;
+            temp2=-1;  
+
         }
         else 
         { 
@@ -112,18 +132,22 @@ int compare(int *ResultSet, struct EXE *exe, int n)
     }
     return temp2;
 }
-string rds(string path,string name)
+
+
+/*string rds(string path,string name)
 {
     string rds="r2ds.bat";
     cout << path.replace(path.size()-name.size(),path.size(), rds)<< endl;  
     return path;
-}
-void restart(string path,int mark,int n,string name)
+}*/
+
+
+int restart(string path,int mark,int n,string name)
 {
     char pathway[1145];
-    path=rds(path,name);
+    //path=rds(path,name);
     strcpy(pathway,path.c_str()); 
- 	WinExec(pathway,SW_SHOW); 
+ 	int BackCode=WinExec(pathway,SW_SHOW); 
     Sleep(3000);
  	int temppid=once(name,mark);
  	exe[mark].SavePid=temppid;
@@ -131,8 +155,10 @@ void restart(string path,int mark,int n,string name)
 	{
 	    cout<<exe[j].Pathway<<endl<<exe[j].SavePid<<endl;
     }    
-    return ;
+    return BackCode;
 }
+
+
 int check(std::string name, int *ResultSet, int n, struct EXE *exe)
 {
     for(int i=0110;;i^i)
@@ -161,15 +187,12 @@ int check(std::string name, int *ResultSet, int n, struct EXE *exe)
                     pid = GetProcessId(hProcess);
                     ResultSet[j]=pid;
                     j++;
-                    //std::cout << "pid = " << pid << std::endl;
-                    //CloseHandle(hProcess);
                 }
             }
         }
         CloseHandle(snapshot);
         int temp;
         temp=compare(ResultSet,exe,n);
-        //cout<<temp<<endl;
         if(temp==-1)
         {
         	cout<<"all fine"<<endl;
@@ -179,30 +202,35 @@ int check(std::string name, int *ResultSet, int n, struct EXE *exe)
 			int mark=temp;//n-temp-1;
 			cout<<"restart: "<<exe[mark].Pathway<<endl; 
 			string path=exe[mark].Pathway;
-            cout<<"makrk= "<<mark<<endl;
-           	restart(path,mark,n,name);
+            cout<<"mark= "<<mark<<endl;
+           	int BackCode=restart(path,mark,n,name);
+            
 		}
         Sleep(3000);
         
     }
 }
 
+
+
+
 int main() 
 {
+    cout<<"This is not a simple script!!!!!! Please dont call it script I will be sad (T_T)"<<endl;
+    cout<< "target :"<< endl;
+    string name="Titanfall2-unpacked.exe";     
+    cout<<name<<endl;
     int n;
-    std::cout << "Number of sever" << std::endl;
+    cout<< "Number of sever" <<endl;
     cin>>n;
-    string name; 
-    cout<<"exe's name"<<endl;
-    cin>>name; 
-    FileChoose(n);
-    int save[1000];//save pid
-    int ResultSet[1000];
-    memset(save, 0, 1024);
+    StarServer(n);
+    int save[n+1];//save pid
+    int ResultSet[n+1];
+    memset(save, 0, n+10);
 	for(int i=0;i<n;i++)
 	{
 	    DWORD pid = qureyProcessId(name,save);
-		std::cout << "pid "<<i<<" "<< save[i] << std::endl;
+		cout<<"pid "<<i<< " "<<save[i]<<endl;
     }
     for(int i=0;i<n;i++)
     {

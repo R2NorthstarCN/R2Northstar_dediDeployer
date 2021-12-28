@@ -216,7 +216,6 @@ int check(std::string name, int *ResultSet, int n, struct EXE *exe)
 
 int main() 
 {
-	cout<<"1"<<endl;
     cout<<"This is not a simple script!!!!!! Please dont call it script I will be sad (T_T)"<<endl;
     cout<< "target :"<< endl;
     string name="Titanfall2-unpacked.exe";  // sort Titanfall2-unpacked 
@@ -225,9 +224,9 @@ int main()
     cout<< "Number of sever" <<endl;
     cin>>n;
     StarServer(n);
-    int save[1000];//save pid
-    int ResultSet[1000];
-    memset(save, 0, 1000);
+    int save[n+1];//save pid
+    int ResultSet[n+1];
+    memset(save, 0, n+1);
 	for(int i=0;i<n;i++)
 	{
 	    DWORD pid = qureyProcessId(name,save);

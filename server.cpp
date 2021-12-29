@@ -228,9 +228,9 @@ int main()
     cout<< "Number of sever" <<endl;
     cin>>n;
     StarServer(n);
-    int save[n+1];//save pid
-    int ResultSet[n+1];
-    memset(save, 0, n+1);
+    int save[1000];//save pid
+    int ResultSet[1000];
+    memset(save, 0, 1000);
 	for(int i=0;i<n;i++)
 	{
 	    DWORD pid = qureyProcessId(name,save);

@@ -22,8 +22,8 @@ using namespace std;
 #define Max 0x7f7f7f
 
 
-DWORD once(string name,int mark);
-DWORD qureyProcessId(std::string name,int *save);
+DWORD once(string name,int mark);//Gets the pid at the top of the stack
+DWORD qureyProcessId(std::string name,int *save);//Gets the pid for each target in the stack
 int StarServer(int m);
 int compare(int *ResultSet, struct EXE *exe, int n);
 //string rds(string path,string name);

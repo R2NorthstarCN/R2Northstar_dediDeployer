@@ -26,9 +26,10 @@ DWORD once(string name,int mark);//Gets the pid at the top of the stack
 DWORD qureyProcessId(std::string name,int *save);//Gets the pid for each target in the stack
 int StarServer(int m);
 int compare(int *ResultSet, struct EXE *exe, int n);
-//string rds(string path,string name);
+//Look for the pid mapped by the structure in the current stack, if you can't find the subscript corresponding to the returned structure
+
 int restart(string path,int mark,int n,string name);
-int check(std::string name, int *ResultSet, int n, struct EXE *exe);
+int check(std::string name, int *ResultSet, int n, struct EXE *exe);//Start the listening process
 
 struct EXE
 {   

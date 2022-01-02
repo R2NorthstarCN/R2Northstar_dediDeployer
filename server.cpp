@@ -1,9 +1,10 @@
-/*版本1.2
-author:XGY4n
-1.现在可以手动启动服务器不用输路径了
-2.修改了一些不必要的代码
-3.修改了部分函数传参,申明
-4.修改了sleep的时间保证了不同性能的电脑进程扫入的准确性
+/*鐗堟湰1.3
+Author:XGY4n
+1.鐜板湪鍙互鎵嬪姩鍚姩鏈嶅姟鍣ㄤ笉鐢ㄨ緭璺緞浜?
+2.淇敼浜嗕竴浜涗笉蹇呰鐨勪唬鐮?
+3.淇敼浜嗛儴鍒嗗嚱鏁颁紶鍙?鐢虫槑
+4.淇敼浜唖leep鐨勬椂闂翠繚璇佷簡涓嶅悓鎬ц兘鐨勭數鑴戣繘绋嬫壂鍏ョ殑鍑嗙‘鎬?
+5.鐜板湪鎵ц鏃跺彲浠ユ坊鍔犳湇鍔″櫒浜?
 */
 
 #include <iostream>
@@ -16,20 +17,34 @@ author:XGY4n
 #include"filepart.h"
 #include <tlhelp32.h>
 #include<conio.h>
+#include <shellapi.h>
 using namespace std; 
 
 
 #define Max 0x7f7f7f
 
 
-DWORD once(string name,int mark);//Gets the pid at the top of the stack
-DWORD qureyProcessId(std::string name,int *save);//Gets the pid for each target in the stack
+
+
+
+DWORD once(string name, int mark);//Gets the pid at the top of the stack
+DWORD qureyProcessId(string name, int *save);//Gets the pid for each target in the stack
 int StarServer(int m);
 int compare(int *ResultSet, struct EXE *exe, int n);
 //Look for the pid mapped by the structure in the current stack, if you can't find the subscript corresponding to the returned structure
+string GetInstructions();
+int restart(string path, int mark, int n, string name);
+string check(string name, int *ResultSet, int n, struct EXE *exe);//Start the listening process
 
-int restart(string path,int mark,int n,string name);
-int check(std::string name, int *ResultSet, int n, struct EXE *exe);//Start the listening process
+
+//Instructions part
+void Help();
+int ExecInstructions(string name, string Instructions, int n);
+int InstructionsAdd(string name, int n);
+
+
+
+
 
 struct EXE
 {   
@@ -38,9 +53,84 @@ struct EXE
 };
 EXE exe[Max];
 
+void Help()
+{
+    cout<<"-----------help------------"<<endl;
+    cout<<"press a to add server"<<endl;
+    cout<<"else Improving "<<endl;
+    cout<<"---------------------------"<<endl;
+    return ;
+}
 
 
-DWORD once(string name,int mark)
+
+int ExecInstructions(string name,  string Instructions, int n)
+{
+    if(Instructions.compare("a")==0)//-add
+    {
+        int temp = InstructionsAdd(name, n);
+        return temp ;
+    }
+    else
+    {
+        cout<< "Instructions not define"<<endl;
+        return -1;
+    }
+    
+}
+
+
+
+int InstructionsAdd(string name , int n)
+{
+    int ExeMark = n;
+    char pathway[1145];
+    exe[ExeMark].Pathway+=fidd(1);
+    cout<<exe[ExeMark].Pathway<<endl;
+    strcpy(pathway,exe[ExeMark].Pathway.c_str()); 
+    //int t=WinExec(pathway,SW_SHOW);
+    HINSTANCE hNewExe = ShellExecute(NULL,"open",pathway,"","",SW_SHOWMINIMIZED); 
+    if ((long long )hNewExe <= 32)
+    {
+        cout<<"start server failed return value: "<< (long long )hNewExe<<endl;
+        return -1;
+    }
+    else
+    {
+        cout<<"start server successed!"<<endl;
+        exe[ExeMark].SavePid = once(name,ExeMark);
+        return 1;
+    }
+    Sleep(1000);
+}
+
+/*int InstructionsClose(string name , int n)
+{
+
+}*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DWORD once(string name, int mark)
 {
     DWORD pid;
     PROCESSENTRY32 entry;
@@ -49,7 +139,7 @@ DWORD once(string name,int mark)
     if (Process32First(snapshot, &entry) == TRUE)
     {
         while (Process32Next(snapshot, &entry) == TRUE)
-        {
+        {  
             if (std::string(entry.szExeFile) == name) 
             {
                 HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, entry.th32ProcessID);
@@ -62,7 +152,7 @@ DWORD once(string name,int mark)
     return pid;	
 }
 
-DWORD qureyProcessId(std::string name,int *save) 
+DWORD qureyProcessId(string name, int *save) 
 {
     DWORD pid;
     PROCESSENTRY32 entry;
@@ -95,19 +185,19 @@ int StarServer(int m)
         exe[i].Pathway+=fidd(1);
         cout<<exe[i].Pathway<<endl;
         strcpy(pathway,exe[i].Pathway.c_str()); 
-        //cout<<pathway<<endl;
-        int t=WinExec(pathway,SW_SHOW);
-        if(t>=31)
+        //int t=WinExec(pathway,SW_SHOW);
+        HINSTANCE hNewExe = ShellExecute(NULL,"open",pathway,"","",SW_SHOWMINIMIZED); 
+        if ((long long )hNewExe <= 32)
         {
-            cout<<"server success launcher"<<endl;
-            Sleep(1000); 
-        } 
+            cout<<"start server failed return value: "<< (long long )hNewExe<<endl;
+            //return -1;
+        }
         else
         {
-            cout<<"something wrong!"<<endl;
-            //exit(0);
+            cout<<"start server successed!"<<endl;
+            //return 1;
         }
-        
+        Sleep(1000);
     }
     
 }
@@ -118,18 +208,17 @@ int compare(int *ResultSet, struct EXE *exe, int n)
     int temp2;
     for(int i=0;i<n;i++)
     {
-    	temp2=0;
+    	temp2 = 0;
         int* ans;
-		ans=find(ResultSet,ResultSet+n,exe[i].SavePid);
+		ans=find(ResultSet, ResultSet+n, exe[i].SavePid);
         if (*ans == exe[i].SavePid)
         { 
             temp2=-1;  
-
         }
         else 
         { 
 	        cout << "Did not find sever"  << endl; 
-            temp2=i;    
+            temp2 = i;    
 			cout<<temp2<<endl;                                                                                                                            
             return temp2;
         }
@@ -138,35 +227,49 @@ int compare(int *ResultSet, struct EXE *exe, int n)
 }
 
 
-/*string rds(string path,string name)
-{
-    string rds="r2ds.bat";
-    cout << path.replace(path.size()-name.size(),path.size(), rds)<< endl;  
-    return path;
-}*/
 
-
-int restart(string path,int mark,int n,string name)
+int restart(string path, int mark, int n, string name)
 {
     char pathway[1145];
     //path=rds(path,name);
     strcpy(pathway,path.c_str()); 
- 	int BackCode=WinExec(pathway,SW_SHOW); 
+ 	HINSTANCE hNewExe = ShellExecute(NULL,"open",pathway,"","",SW_SHOWMINIMIZED); //WinExec(pathway,SW_SHOW); 
     Sleep(3000);
- 	int temppid=once(name,mark);
+ 	int temppid = once(name, mark);
  	exe[mark].SavePid=temppid;
 	for(int j=0;j<n;j++)
 	{
 	    cout<<exe[j].Pathway<<endl<<exe[j].SavePid<<endl;
     }    
-    return BackCode;
+    return (long long )hNewExe;
 }
 
 
-int check(std::string name, int *ResultSet, int n, struct EXE *exe)
+string GetInstructions() 
+{
+    string a;
+    time_t timeBegin = time(0);
+    while(0|1)  //the main loop  
+    {           
+        if(_kbhit())//detect the keyboard 
+        {       
+            a+=_getch();
+            return a;
+        }
+        else if(time(0)-timeBegin>=5)
+        {
+            timeBegin = time(0);
+            return a;
+        }
+    }
+}
+
+
+string check(string name, int *ResultSet, int n, struct EXE *exe)
 {
     for(int i=0110;;i^i)
-    {    
+    {  
+        cout<<"This is not a simple script!!!!!! Please dont call it script I will be sad (T_T)"<<endl;  
     	for(int l=0;l<n;l++)
 		{
 		    cout<<"ResultSet "<<ResultSet[l]<<" "<<endl;;
@@ -176,7 +279,7 @@ int check(std::string name, int *ResultSet, int n, struct EXE *exe)
 	    	cout<<"compare "<<exe[k].Pathway<<" "<<exe[k].SavePid<<endl;
     	}     
 		memset(ResultSet, 0, 1000);
-        int j=0;
+        int j = 0;
         DWORD pid;
         PROCESSENTRY32 entry;
         entry.dwSize = sizeof(PROCESSENTRY32);
@@ -189,29 +292,37 @@ int check(std::string name, int *ResultSet, int n, struct EXE *exe)
                 {
                     HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, entry.th32ProcessID);
                     pid = GetProcessId(hProcess);
-                    ResultSet[j]=pid;
+                    ResultSet[j] = pid;
                     j++;
                 }
             }
         }
         CloseHandle(snapshot);
         int temp;
-        temp=compare(ResultSet,exe,n);
-        if(temp==-1)
+        temp = compare(ResultSet,exe,n);
+        if(temp == -1)
         {
         	cout<<"all fine"<<endl;
+            cout<<"now server number : "<<n<<"/10"<<endl;
+            Help();
+            string Instructions;
+            Instructions += GetInstructions();
+            //cout<<"s : "<<Instructions<<endl;
+            if(!Instructions.empty())
+            {
+                return Instructions;
+            }
 		}
 		else
 		{ 
-			int mark=temp;//n-temp-1;
+			int mark = temp;//n-temp-1;
 			cout<<"restart: "<<exe[mark].Pathway<<endl; 
 			string path=exe[mark].Pathway;
             cout<<"mark= "<<mark<<endl;
-           	int BackCode=restart(path,mark,n,name);
-            
+           	int BackCode=restart(path, mark, n, name);
 		}
-        Sleep(3000);
-        
+        //Sleep(3000);
+        system("cls");
     }
 }
 
@@ -220,6 +331,7 @@ int check(std::string name, int *ResultSet, int n, struct EXE *exe)
 
 int main() 
 {
+	//cout<<"1"<<endl;
     cout<<"This is not a simple script!!!!!! Please dont call it script I will be sad (T_T)"<<endl;
     cout<< "target :"<< endl;
     string name="Titanfall2-unpacked.exe";  // sort Titanfall2-unpacked 
@@ -231,21 +343,38 @@ int main()
     int save[1000];//save pid
     int ResultSet[1000];
     memset(save, 0, 1000);
-	for(int i=0;i<n;i++)
+	for(int i=0; i<n; i++)
 	{
-	    DWORD pid = qureyProcessId(name,save);
+	    DWORD pid = qureyProcessId(name, save);
 		cout<<"pid "<<i<< " "<<save[i]<<endl;
     }
-    for(int i=0;i<n;i++)
+    for(int i=0; i<n; i++)
     {
         exe[i].SavePid = save[i];
     }
-    for(int i=0;i<n;i++)
+    for(int i=0; i<n; i++)
 	{
 	    cout<<exe[i].Pathway<<endl<<exe[i].SavePid<<endl;
     }
-    Sleep(5000);
-    check(name,ResultSet,n,exe);//start  
+    Sleep(3000);
+    while(0|1)
+    {
+        string comd;
+        comd = check(name, ResultSet, n, exe);//start  
+        //cout<<"break "<< comd<<endl;
+        int state = ExecInstructions(name, comd, n);
+        if(state>=0)
+        {
+            cout<<"successed"<<endl;
+            Sleep(2000);
+        }
+        else
+        {
+            cout<<"failed"<<endl;
+            break;
+        }
+        n++;
+    }
     getch();
     return 0;
 }

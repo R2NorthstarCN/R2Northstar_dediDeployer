@@ -1,3 +1,10 @@
+R2Northstar_dediDeployer
+进行批量服务器重启的话，请修改你的r2ds.bat，添加一行CD 服务器路径 加回车。
+如：
+CD E:\\server1
+NorthstarLauncher.exe -dedicated -multiple
+其中northstarlauncher.exe应存在于server1目录下.
+
 # [CN]本地通过监测进程保证服务器重启
 当前代码较为简陋,只完成了底层的逻辑映射,代码函数封装程度低,会不断更新!
 安装：

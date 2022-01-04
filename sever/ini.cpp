@@ -22,7 +22,7 @@ EXE exe[Max];
 string lpAppName = "ExeNode";
 string Number = "Number";
 char lName[1145];
-char InIPath[1000]="%appdata%\\Nscndeploy\\TTFServer.ini";
+char InIPath[1000]="C:\\Users\\Public\\Documents\\TTFServer.ini";;
 char Targetpath[1000];
 char Exemaessage[1000];
 char SavePid[1000];

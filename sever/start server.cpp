@@ -1,19 +1,17 @@
-/*版本1.4
+/*版本1.5
 Author:XGY4n
 1.2 现在可以手动启动服务器不用输路径了
 1.2 修改了一些不必要的代码
 1.2 修改了部分函数传参,申明
 1.2 修改了sleep的时间保证了不同性能的电脑进程扫入的准确性
-
 1.3 现在执行时可以添加服务器了
 1.3 现在可以通过指令来执行某些操作了
-
 1.4 完成了关闭所有服务器的指令
 1.4 完成了重启所有服务器的指令
-
 1.5 生成一个ini文件,记录上次的路径,一键开服
 1.5 把代码封装到了.h文件中方便调用和阅读
 1.5 新增几个指令
+1.6 解决进程假死问题
 */
 
 #include <iostream>
@@ -24,8 +22,12 @@ Author:XGY4n
 #include <Windows.h>
 #include <processthreadsapi.h>
 #include <tlhelp32.h>
-#include<conio.h>
+#include <conio.h>
 #include <shellapi.h>
+#include <tchar.h>
+#include <StrSafe.h>
+#include <winuser.h>
+
 
 #include"filepart.h"
 #include"ini.h"
@@ -58,7 +60,47 @@ int InstructionsClose(string name, int n);
 int InstructionsRestart(string name, int n);
 string GetInstructions();*/
 int ResultSet[1000];
-string name="Titanfall2-unpacked.exe";  // sort Titanfall2-unpacked
+string name="NorthstarLauncher.exe";  // sort Titanfall2-unpacked NorthstarLauncher.exe 1628
+
+
+
+typedef struct 
+{
+	HWND hwndWindow;
+	DWORD dwProcessID;
+} EnumWindowsArg;
+
+BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) 
+{
+	EnumWindowsArg *pArg = (EnumWindowsArg *)lParam;
+	DWORD dwProcessId = 0;
+ 
+	GetWindowThreadProcessId(hwnd, &dwProcessId);
+	if (dwProcessId == pArg->dwProcessID) 
+    {
+		pArg->hwndWindow = hwnd;
+		return(FALSE);
+	}
+ 
+	return(TRUE);
+}
+ 
+HWND GetWindowHwndByPID(DWORD dwProcessID) 
+{
+	HWND hwndRet = NULL;
+	EnumWindowsArg ewa;
+ 
+	ewa.dwProcessID = dwProcessID;
+	ewa.hwndWindow = NULL;
+ 
+	EnumWindows(EnumWindowsProc, (LPARAM)&ewa);
+	if (ewa.hwndWindow)
+		hwndRet = ewa.hwndWindow;
+ 
+	return(hwndRet);
+}
+
+
 
 void Help()
 {
@@ -152,7 +194,28 @@ int compare(int *ResultSet, struct EXE *exe, int n)
     return temp2;
 }
 
-
+int dead(struct EXE *exe, int n)
+{
+    int temp3;
+    HWND hWnd; 
+    for(int i = 0;i<n;i++)
+    {
+        hWnd = GetWindowHwndByPID(exe[i].SavePid);
+	    LRESULT success = SendMessageTimeout(hWnd,WM_SETTINGCHANGE,0,NULL,SMTO_ABORTIFHUNG,1000,NULL);//HWND_ (LPARAM) "Environment"
+	    if(success==1)
+        {
+            temp3 = -1; 
+        }	
+        else
+        {
+            cout<<"Process death"<<endl;
+            temp3 = i;    
+			cout<<temp3<<endl;                                                                                                                            
+            return temp3;
+        }
+    }
+    return temp3;
+}
 
 int restart(string path, int mark, int n, string name)
 {
@@ -208,15 +271,29 @@ string check(string name, int *ResultSet, int n, struct EXE *exe)
         temp = compare(ResultSet,exe,n);
         if(temp == -1)
         {
-        	cout<<"all fine"<<endl;
-            cout<<"now server number : "<<n<<endl;
-            Help();
-            string Instructions;
-            Instructions += GetInstructions();
-            if(!Instructions.empty())
+            int deadtemp;
+            deadtemp=dead(exe,n);
+            if(deadtemp == -1)
             {
-                return Instructions;
+                cout<<"all fine"<<endl;
+                cout<<"now server number : "<<n<<endl;
+                Help();
+                string Instructions;
+                Instructions += GetInstructions();
+                if(!Instructions.empty())
+                {
+                    return Instructions;
+                }
             }
+            else
+            {
+                int mark = deadtemp;//n-temp-1;
+			    cout<<"restart: "<<exe[mark].Pathway<<endl; 
+			    string path=exe[mark].Pathway;
+                cout<<"mark= "<<mark<<endl;
+           	    int BackCode=restart(path, mark, n, name);
+            }
+
 		}
 		else
 		{ 
@@ -256,7 +333,11 @@ int main()
                 cout<<"successed restart all"<<endl;
                 Sleep(1000);
             }
-            //else if(state==3)
+            else if(state==3)
+            {
+                cout<<"successed save .ini"<<endl;
+                Sleep(1000);
+            }
             else
             {
                 cout<<"failed"<<endl;
@@ -278,10 +359,10 @@ int main()
         int save[1000];//save pid
         //int ResultSet[1000];
         memset(save, 0, 1000);
-	    for(int i=0; i<n; i++)
-	    {
+	for(int i=0; i<n; i++)
+	{
 	        DWORD pid = qureyProcessId(name, save);
-		    cout<<"pid "<<i<< " "<<save[i]<<endl;
+		cout<<"pid "<<i<< " "<<save[i]<<endl;
         }
         for(int i=0; i<n; i++)
         {
